@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Atlas Batas Provinsi Indonesia 1945–1976</title>
-<meta name="description" content="Bandingkan perkembangan batas provinsi Indonesia dari 1945 hingga 1976. Data: Badan Informasi Geospasial.">
+<title>Atlas Perkembangan Wilayah Administrasi Indonesia</title>
+<meta name="description" content="Peta interaktif perkembangan batas wilayah administrasi Indonesia. Data: Badan Informasi Geospasial.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{font-family:var(--sans);color:var(--ink);background:var(--paper);display:grid;grid-template-columns:340px 1fr;grid-template-rows:100%}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);display:grid;grid-template-columns:350px 1fr;grid-template-rows:100%}
 aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;z-index:1000}
 header{padding:22px 22px 14px}
 h1{font:600 26px/1.15 var(--serif);margin:0 0 8px;letter-spacing:-.01em}
@@ -29,20 +29,24 @@ header p{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
 .tools{display:flex;gap:8px;padding:0 22px 12px}
 button{font:500 13px var(--sans);color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--accent);color:var(--accent)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 ul{list-style:none;margin:0;padding:0 10px;overflow:auto;flex:1}
-li label{display:grid;grid-template-columns:20px 44px 1fr auto;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:14px}
+li.grp{padding:14px 12px 4px;font:600 13px var(--sans);color:var(--muted)}
+li label{display:grid;grid-template-columns:20px 44px 1fr auto;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:14px}
 li label:hover{background:color-mix(in srgb,var(--accent) 8%,transparent)}
 li input{accent-color:var(--accent);margin:0}
 .sw{height:0;border-top:3px solid var(--c)}
-.yr{font-variant-numeric:tabular-nums;font-weight:500}
-.st{font-size:11.5px;color:var(--muted)}
+.nm{font-variant-numeric:tabular-nums;font-weight:500;line-height:1.3}
+.st{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .st.err{color:var(--warn)}
+.note{margin:6px 12px;font-size:12.5px;color:var(--warn);line-height:1.4}
 footer{padding:14px 22px 18px;border-top:1px solid var(--line);font-size:12px;line-height:1.5;color:var(--muted)}
 footer a{color:var(--accent)}
 #map{height:100%;width:100%;background:var(--paper)}
 .leaflet-popup-content{font:14px/1.45 var(--sans);margin:12px 14px}
 .leaflet-popup-content b{font:600 16px var(--serif)}
+.leaflet-popup-content dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.leaflet-popup-content dt{color:#6b7c84}.leaflet-popup-content dd{margin:0}
 @media (max-width:760px){
   body{grid-template-columns:1fr;grid-template-rows:46% 54%}
   aside{order:2;border-right:0;border-top:1px solid var(--line)}
@@ -56,125 +60,157 @@ footer a{color:var(--accent)}
 <body>
 <aside>
   <header>
-    <h1>Batas provinsi Indonesia, 1945–1976</h1>
-    <p>Centang tahun untuk menampilkan garis batas. Aktifkan beberapa tahun sekaligus untuk melihat perubahannya. Klik garis untuk detail.</p>
+    <h1>Atlas wilayah administrasi Indonesia</h1>
+    <p>Centang layer untuk menampilkannya. Aktifkan beberapa sekaligus untuk membandingkan perubahan batas. Klik garis atau area untuk detail.</p>
   </header>
   <div class="tools">
     <button id="all" type="button">Tampilkan semua</button>
     <button id="none" type="button">Kosongkan</button>
   </div>
-  <ul id="list" aria-label="Daftar tahun batas provinsi"></ul>
+  <ul id="list" aria-label="Daftar layer"></ul>
   <footer>
-    Sumber: <a href="https://geoservices.big.go.id/gis/rest/services/PTRA/Atlas_Perkembangan_Wilayah_Administrasi/MapServer/6" target="_blank" rel="noopener">Atlas Perkembangan Wilayah Administrasi, Badan Informasi Geospasial</a>.
-    Peta dasar © OpenStreetMap, © CARTO.
+    Sumber: <a href="https://geoservices.big.go.id/gis/rest/services/PTRA/Atlas_Perkembangan_Wilayah_Administrasi/MapServer" target="_blank" rel="noopener">Atlas Perkembangan Wilayah Administrasi, Badan Informasi Geospasial</a>.
+    Peta dasar © Esri, OpenStreetMap.
   </footer>
 </aside>
-<div id="map" role="application" aria-label="Peta batas provinsi"></div>
+<div id="map" role="application" aria-label="Peta wilayah administrasi"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const SERVICE = "https://geoservices.big.go.id/gis/rest/services/PTRA/Atlas_Perkembangan_Wilayah_Administrasi/MapServer/6/query";
+const ROOT  = "https://geoservices.big.go.id/gis/rest/services/PTRA/Atlas_Perkembangan_Wilayah_Administrasi/MapServer";
 const PROXY = "/api/arcgis";
+const YEAR_LAYER = 6;
 const YEARS = [1945,1950,1956,1957,1958,1959,1960,1964,1967,1976];
-const FIELD = "BTS_ADMIN";
 const PAGE = 1000;
+const OTHER_COLORS = ["#e8b923","#2bb673","#b36ae2","#ff7aa2","#4cc9f0","#c0c7cc","#f4a261","#7bd389","#ef476f","#06d6a0"];
 
-// Gradien warna dari tahun tertua (biru-hijau) ke terbaru (jingga-merah)
-const from = [42,111,151], to = [214,76,38];
-const colorFor = i => {
-  const t = i/(YEARS.length-1);
-  return "rgb(" + from.map((a,k)=>Math.round(a+(to[k]-a)*t)).join(",") + ")";
-};
-
-const map = L.map("map",{zoomControl:true,preferCanvas:true}).setView([-2.5,118],5);
+/* ---------- Peta & basemap tanpa API key ---------- */
+const map = L.map("map",{preferCanvas:true,maxZoom:16})
+  .fitBounds([[-11.5,94.5],[6.5,141.5]]);
 const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{
-  attribution:"© OpenStreetMap © CARTO",maxZoom:12,subdomains:"abcd"
-}).addTo(map);
+const esri = p => `https://server.arcgisonline.com/ArcGIS/rest/services/${p}/MapServer/tile/{z}/{y}/{x}`;
+const base = {
+  "Terang":  L.tileLayer(esri("Canvas/World_Light_Gray_Base"),{attribution:"Tiles © Esri",maxZoom:16}),
+  "Gelap":   L.tileLayer(esri("Canvas/World_Dark_Gray_Base"), {attribution:"Tiles © Esri",maxZoom:16}),
+  "Jalan":   L.tileLayer(esri("World_Street_Map"),            {attribution:"Tiles © Esri",maxZoom:16}),
+  "Satelit": L.tileLayer(esri("World_Imagery"),               {attribution:"Tiles © Esri",maxZoom:16}),
+  "OSM":     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19})
+};
+base[dark?"Gelap":"Terang"].addTo(map);
+L.control.layers(base,null,{position:"topright",collapsed:true}).addTo(map);
 
-const layers = {};   // year -> L.GeoJSON
-const loaded = {};   // year -> boolean
+/* ---------- Akses data (langsung, lalu proxy bila gagal) ---------- */
 let useProxy = false;
-
-async function getJSON(params){
-  const qs = new URLSearchParams(params).toString();
+async function api(layer, params){
+  const qs = new URLSearchParams(params||{}).toString();
+  const direct = layer==null ? `${ROOT}?f=json` : `${ROOT}/${layer}/query?${qs}`;
+  const proxy  = layer==null ? PROXY : `${PROXY}?layer=${layer}&${qs}`;
   if(!useProxy){
-    try{
-      const r = await fetch(`${SERVICE}?${qs}`);
-      if(!r.ok) throw new Error(r.status);
-      return await r.json();
-    }catch(e){ useProxy = true; }   // kemungkinan CORS, pakai proxy
+    try{ const r = await fetch(direct); if(!r.ok) throw new Error(r.status); return await r.json(); }
+    catch(e){ useProxy = true; }
   }
-  const r = await fetch(`${PROXY}?${qs}`);
+  const r = await fetch(proxy);
   if(!r.ok) throw new Error("HTTP "+r.status);
   return r.json();
 }
-
-async function loadYear(year){
-  const features = [];
-  let offset = 0, more = true;
+async function loadFeatures(item){
+  const feats=[]; let offset=0, more=true;
   while(more){
-    const data = await getJSON({
-      where:`${FIELD}='Batas Provinsi Tahun ${year}'`,
-      outFields:"*", outSR:4326, f:"geojson",
+    const d = await api(item.layer,{
+      where:item.where||"1=1", outFields:"*", outSR:4326, f:"geojson",
       resultOffset:offset, resultRecordCount:PAGE,
-      maxAllowableOffset:0.002, geometryPrecision:4
+      maxAllowableOffset:0.003, geometryPrecision:4
     });
-    if(data.error) throw new Error(data.error.message||"Kesalahan server");
-    features.push(...(data.features||[]));
-    more = !!(data.properties?.exceededTransferLimit || data.exceededTransferLimit);
+    if(d.error) throw new Error(d.error.message||"Kesalahan server");
+    feats.push(...(d.features||[]));
+    more = !!(d.properties?.exceededTransferLimit || d.exceededTransferLimit);
     offset += PAGE;
   }
-  return features;
+  return feats;
 }
 
+/* ---------- Daftar item ---------- */
+const from=[64,160,224], to=[240,80,40];
+const grad = i => "rgb("+from.map((a,k)=>Math.round(a+(to[k]-a)*i/(YEARS.length-1))).join(",")+")";
+const items = {};      // id -> item
 const list = document.getElementById("list");
-YEARS.forEach((year,i)=>{
-  const c = colorFor(i);
-  const li = document.createElement("li");
-  li.innerHTML = `<label style="--c:${c}">
-    <input type="checkbox" data-year="${year}" ${year===1976?"checked":""}>
-    <span class="sw" style="${year===1976?"border-top-width:4px":""}"></span>
-    <span class="yr">${year}</span>
-    <span class="st" id="st-${year}"></span></label>`;
-  list.appendChild(li);
-});
 
-async function toggle(year,on){
-  const st = document.getElementById("st-"+year);
-  const i = YEARS.indexOf(year);
-  if(!on){ if(layers[year]) map.removeLayer(layers[year]); st.textContent=""; return; }
-  if(!loaded[year]){
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function addGroup(title){ const li=document.createElement("li"); li.className="grp"; li.textContent=title; list.appendChild(li); }
+function addItem(it){
+  items[it.id]=it;
+  const li=document.createElement("li");
+  li.innerHTML=`<label style="--c:${it.color}">
+    <input type="checkbox" data-id="${it.id}" ${it.checked?"checked":""}>
+    <span class="sw" style="${it.thick?"border-top-width:4px":""}"></span>
+    <span class="nm">${esc(it.label)}</span>
+    <span class="st" id="st-${it.id}"></span></label>`;
+  list.appendChild(li);
+}
+
+addGroup("Garis batas provinsi 1945–1976");
+YEARS.forEach((y,i)=>addItem({
+  id:"y"+y, label:String(y), layer:YEAR_LAYER,
+  where:`BTS_ADMIN='Batas Provinsi Tahun ${y}'`,
+  color:grad(i), thick:y===1976, checked:y===1976
+}));
+
+/* Layer lain di MapServer (mis. tahun-tahun setelah 1976) ditemukan otomatis */
+(async function discover(){
+  try{
+    const meta = await api(null);
+    if(meta.error) throw new Error(meta.error.message||"ditolak server");
+    const others = (meta.layers||[])
+      .filter(l=>l.id!==YEAR_LAYER && !(l.subLayerIds&&l.subLayerIds.length))
+      .map(l=>({l, y:(l.name.match(/(?:19|20)\d{2}/)||[])[0]}))
+      .sort((a,b)=>(a.y&&b.y)?(a.y-b.y||a.l.id-b.l.id):(a.y?-1:b.y?1:a.l.id-b.l.id));
+    if(!others.length) return;
+    addGroup("Layer lain di atlas");
+    others.forEach(({l},i)=>addItem({
+      id:"l"+l.id, label:l.name, layer:l.id, color:OTHER_COLORS[i%OTHER_COLORS.length], checked:false
+    }));
+  }catch(e){
+    const p=document.createElement("p"); p.className="note";
+    p.textContent="Daftar layer tambahan tidak bisa dimuat ("+(e.message||e)+").";
+    list.appendChild(p);
+  }
+})();
+
+/* ---------- Tampil / sembunyi ---------- */
+const layers={};
+function popupHTML(it,f){
+  const p=f.properties||{};
+  const skip=/^(OBJECTID|Shape.*|FID)$/i;
+  const rows=Object.entries(p).filter(([k,v])=>!skip.test(k)&&v!==null&&v!=="").slice(0,8)
+    .map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  return `<b>${esc(it.label)}</b>${rows?`<dl>${rows}</dl>`:""}`;
+}
+async function toggle(id,on){
+  const it=items[id], st=document.getElementById("st-"+id), box=document.querySelector(`[data-id="${id}"]`);
+  if(!on){ if(layers[id]) map.removeLayer(layers[id]); return; }
+  if(!layers[id]){
     st.className="st"; st.textContent="memuat…";
     try{
-      const feats = await loadYear(year);
-      layers[year] = L.geoJSON({type:"FeatureCollection",features:feats},{
-        style:{color:colorFor(i),weight:year===1976?3:2,opacity:.95},
-        onEachFeature:(f,l)=>l.bindPopup(`<b>${f.properties[FIELD]||"Batas provinsi "+year}</b><br>Panjang segmen ± ${((f.properties.Shape_Length||0)/1000).toFixed(1)} km`)
+      const feats=await loadFeatures(it);
+      layers[id]=L.geoJSON({type:"FeatureCollection",features:feats},{
+        style:f=>/Polygon/.test(f.geometry?.type||"")
+          ?{color:it.color,weight:1.4,opacity:.95,fillColor:it.color,fillOpacity:.1}
+          :{color:it.color,weight:it.thick?3:2,opacity:.95},
+        onEachFeature:(f,l)=>l.bindPopup(popupHTML(it,f))
       });
-      loaded[year]=true;
-      st.textContent = feats.length+" garis";
+      st.textContent=feats.length+" objek";
     }catch(e){
       st.className="st err"; st.textContent="gagal"; st.title=String(e.message||e);
-      document.querySelector(`[data-year="${year}"]`).checked=false;
-      return;
+      box.checked=false; return;
     }
   }
-  const box = document.querySelector(`[data-year="${year}"]`);
-  if(box.checked){ layers[year].addTo(map); if(year===1976 || !map._fitted){ fit(layers[year]); } }
+  if(box.checked) layers[id].addTo(map);
 }
-function fit(layer){
-  if(map._fitted) return;
-  const b = layer.getBounds(); if(b.isValid()){ map.fitBounds(b,{padding:[30,30]}); map._fitted=true; }
-}
+list.addEventListener("change",e=>{ if(e.target.matches("input[data-id]")) toggle(e.target.dataset.id,e.target.checked); });
+document.getElementById("all").onclick=()=>document.querySelectorAll("input[data-id]").forEach(b=>{ if(!b.checked){b.checked=true; toggle(b.dataset.id,true);} });
+document.getElementById("none").onclick=()=>document.querySelectorAll("input[data-id]").forEach(b=>{ b.checked=false; toggle(b.dataset.id,false); });
 
-list.addEventListener("change",e=>{
-  if(e.target.matches("input[data-year]")) toggle(+e.target.dataset.year,e.target.checked);
-});
-document.getElementById("all").onclick = ()=>document.querySelectorAll("input[data-year]").forEach(b=>{ if(!b.checked){b.checked=true; toggle(+b.dataset.year,true);} });
-document.getElementById("none").onclick = ()=>document.querySelectorAll("input[data-year]").forEach(b=>{ b.checked=false; toggle(+b.dataset.year,false); });
-
-toggle(1976,true);
+toggle("y1976",true);
 </script>
 </body>
 </html>
