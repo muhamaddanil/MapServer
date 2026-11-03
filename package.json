@@ -1,0 +1,7 @@
+{
+  "name": "atlas-batas-provinsi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Peta interaktif perkembangan batas provinsi Indonesia 1945-1976 (data: BIG)",
+  "type": "module"
+}
